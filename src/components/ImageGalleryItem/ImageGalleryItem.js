@@ -1,8 +1,13 @@
 import styled from "styled-components"
 
-export const ImageGalleryItem = ({ imgUrl }) => {
+export const ImageGalleryItem = ({id, imgUrl, onClick }) => {
+
+    const   onImageClick = (e) => {
+        onClick(id)
+    }
+
     return (
-        <GalleryItemWrapper><img src={imgUrl} alt="" /></GalleryItemWrapper>
+        <GalleryItemWrapper onClick={onImageClick}><img src={imgUrl} alt="" /></GalleryItemWrapper>
     )
 }
 

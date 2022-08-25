@@ -4,13 +4,16 @@ import axios from "axios";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { Button } from "./Button/Button";
 import { GlobalStyle } from "./GlobalStyles";
+import { Modal } from "./Modal/Modal";
 
 export class App extends Component {
   state = {
     images: [],
     query: '',
     isRendered: false,
-    page: 1
+    page: 1,
+    isModalOpened: false,
+    selectedImageUrl: ''
   }
 
   formSubmitHandler = (query) => {
@@ -42,12 +45,27 @@ export class App extends Component {
     })
   }
 
+  onModalOpen = (id) => {
+    const filteredImage = this.state.images.filter(image => String(image.id).includes(String(id)));
+    this.setState({
+      isModalOpened: true,
+      selectedImageUrl: filteredImage[0].largeImageURL
+    })
+  }
+
+  onModalClose = (e) => {
+    this.setState(({ isModalOpened }) => ({
+      isModalOpened: !isModalOpened,
+    }))
+  }
+
   render() {
     return (
       <>
         <Searchbar onSubmit={this.formSubmitHandler}/>
-        <ImageGallery images={this.state.images} />
+        <ImageGallery images={this.state.images} onClick={this.onModalOpen} />
         {this.state.isRendered && <Button onClick={this.onLoadMore} />}
+        {this.state.isModalOpened && <Modal imageUrl={this.state.selectedImageUrl} onClose={this.onModalClose} />}
         <GlobalStyle />
       </>
     );
