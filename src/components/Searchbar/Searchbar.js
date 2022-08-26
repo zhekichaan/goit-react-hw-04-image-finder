@@ -1,4 +1,5 @@
 import { Box } from "components/Box";
+import PropTypes from 'prop-types';
 import { Component } from "react"
 import { FormWrapper } from "./Searchbar.styled";
 
@@ -6,6 +7,10 @@ export class Searchbar extends Component {
     state = {
         query: "",
     }
+
+    static propTypes = {
+        onSubmit: PropTypes.func.isRequired
+    } 
 
     handleChange = e => {
         const { name, value } = e.target;

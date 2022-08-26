@@ -1,4 +1,5 @@
 import { GalleryItemWrapper } from "./ImageGalleryItem.styled"
+import PropTypes from 'prop-types';
 
 export const ImageGalleryItem = ({id, imgUrl, onClick }) => {
     return (
@@ -6,3 +7,8 @@ export const ImageGalleryItem = ({id, imgUrl, onClick }) => {
     )
 }
 
+ImageGalleryItem.propTypes = {
+    id: PropTypes.number.isRequired,
+    imgUrl: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired
+}

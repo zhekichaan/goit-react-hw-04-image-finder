@@ -70,7 +70,7 @@ export class App extends Component {
     return (
       <>
         <Searchbar onSubmit={this.formSubmitHandler}/>
-        <ImageGallery images={this.state.images} onClick={this.onModalOpen} />
+        {this.state.isRendered && <ImageGallery images={this.state.images} onClick={this.onModalOpen} />}
         {this.state.isLoading && <Loader />}
         {this.state.isRendered && <Button onClick={this.onLoadMore} />}
         {this.state.isModalOpened && <Modal imageUrl={this.state.selectedImageUrl} onClose={this.onModalClose} />}
