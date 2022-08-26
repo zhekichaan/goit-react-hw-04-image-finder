@@ -49,7 +49,6 @@ export class App extends Component {
         page: this.state.page + 1,
             isLoading: false,
       }))
-      window.scrollTo(0, document.body.scrollHeight);
     })
   }
 
@@ -61,7 +60,7 @@ export class App extends Component {
     })
   }
 
-  onModalClose = (e) => {
+  onModalClose = () => {
     this.setState(({ isModalOpened }) => ({
       isModalOpened: !isModalOpened,
     }))
