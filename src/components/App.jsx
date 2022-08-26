@@ -34,6 +34,14 @@ export class App extends Component {
             page: this.state.page + 1,
             isLoading: false,
           })
+        } else {
+          const images = res.data.hits
+          this.setState({
+            images: images,
+            isRendered: false,
+            page: this.state.page + 1,
+            isLoading: false,
+          })
         }
     })
   }
