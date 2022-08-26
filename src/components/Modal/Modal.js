@@ -47,6 +47,7 @@ const Overlay = styled.div`
 `
 
 const ImageWrapper = styled.img`
-    width: 1200px;
+    max-width: 1200px;
+    max-height: 900px;
     object-fit: contain;
 `
