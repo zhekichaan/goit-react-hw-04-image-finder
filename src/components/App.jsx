@@ -1,11 +1,11 @@
 import { Component } from "react";
 import { Searchbar } from "./Searchbar/Searchbar";
-import axios from "axios";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { Button } from "./Button/Button";
 import { GlobalStyle } from "./GlobalStyles";
 import { Modal } from "./Modal/Modal";
 import { Loader } from "./Loader/Loader";
+import { fetchImages } from "services/api";
 
 export class App extends Component {
   state = {
@@ -20,43 +20,40 @@ export class App extends Component {
 
   formSubmitHandler = (query) => {
     this.setState({
+      images: [],
       query: query,
       page: 1,
       isLoading: true,
     })
-    axios.get(`https://pixabay.com/api/?q=${query}&page=${this.state.page}&key=29465643-fffbf5866313856146df4112d&image_type=photo&orientation=horizontal&per_page=12`)
-    .then(res => {
-      if(res.data.totalHits !== 0) {
-        const images = res.data.hits
-          this.setState({
-            images: images,
-            isRendered: true,
-            page: this.state.page + 1,
-            isLoading: false,
-          })
-        } else {
-          const images = res.data.hits
-          this.setState({
-            images: images,
-            isRendered: false,
-            page: this.state.page + 1,
-            isLoading: false,
-          })
-        }
-    })
+  }
+
+  async componentDidUpdate(prevProps, prevState) {
+    try {
+      let response = fetchImages(this.state.query, this.state.page)
+      let images = (await response).data.hits
+      let filteredImages = images.map((image) => {
+        return (({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))(image)
+      })
+      if(this.state.query !== prevState.query || this.state.page !== prevState.page) {
+        this.setState(prevState => ({
+          images: [...prevState.images, ...filteredImages],
+          isRendered: true,
+          isLoading: false,
+        }))
+      } else if((await response).data.totalHits < 12) {
+        this.setState({
+          isRendered: false,
+        })
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   onLoadMore = () => {
     this.setState({
       isLoading: true,
-    })
-    axios.get(`https://pixabay.com/api/?q=${this.state.query}&page=${this.state.page}&key=29465643-fffbf5866313856146df4112d&image_type=photo&orientation=horizontal&per_page=12`)
-    .then(res => {
-      this.setState(prevState => ({
-        images: [...prevState.images, ...res.data.hits],
-        page: this.state.page + 1,
-            isLoading: false,
-      }))
+      page: this.state.page + 1
     })
   }
 
