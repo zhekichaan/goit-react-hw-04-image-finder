@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import { Searchbar } from "./Searchbar/Searchbar";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { Button } from "./Button/Button";
@@ -7,80 +7,75 @@ import { Modal } from "./Modal/Modal";
 import { Loader } from "./Loader/Loader";
 import { fetchImages } from "services/api";
 
-export class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    isRendered: false,
-    page: 1,
-    isModalOpened: false,
-    selectedImageUrl: '',
-    isLoading: false,
-  }
+export const App = () => {
 
-  formSubmitHandler = (query) => {
-    this.setState({
-      images: [],
-      query: query,
-      page: 1,
-      isLoading: true,
-    })
-  }
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [isRendered, setisRendered] = useState(false);
+  const [page, setPage] = useState(1);
+  const [isModalOpened, setIsModalOpened] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  async componentDidUpdate(prevProps, prevState) {
-    try {
-      let response = fetchImages(this.state.query, this.state.page)
-      let images = (await response).data.hits
-      let filteredImages = images.map((image) => {
-        return (({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))(image)
-      })
-      if(this.state.query !== prevState.query || this.state.page !== prevState.page) {
-        this.setState(prevState => ({
-          images: [...prevState.images, ...filteredImages],
-          isRendered: true,
-          isLoading: false,
-        }))
-      } else if((await response).data.totalHits < 12) {
-        this.setState({
-          isRendered: false,
-        })
-      }
-    } catch (error) {
-      console.log(error);
+  const formSubmitHandler = (query) => {
+    if(query !== '') {
+      setImages([])
+      setQuery(query)
+      setPage(1)
+      setIsLoading(true)
     }
   }
 
-  onLoadMore = () => {
-    this.setState({
-      isLoading: true,
-      page: this.state.page + 1
-    })
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let response = fetchImages(query, page)
+        let images = (await response).data.hits
+        let filteredImages = images.map((image) => {
+          return (({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))(image)
+        })
+        if(query !== '') {
+          setImages(prevState => 
+            [...prevState, ...filteredImages] 
+          )
+          setIsLoading(false)
+        if((await response).data.totalHits < 12) {
+          setisRendered(false)
+        } else {
+          setisRendered(true)
+        }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchData().catch(console.error);
+  }, [page, query]);
+    
+  const onLoadMore = () => {
+    setIsLoading(true)
+    setPage(page => page + 1)
   }
 
-  onModalOpen = (id) => {
-    const filteredImage = this.state.images.filter(image => String(image.id).includes(String(id)));
-    this.setState({
-      isModalOpened: true,
-      selectedImageUrl: filteredImage[0].largeImageURL
-    })
+  const onModalOpen = (id) => {
+    const filteredImage = images.filter(image => String(image.id).includes(String(id)));
+    setIsModalOpened(true)
+    setSelectedImageUrl(filteredImage[0].largeImageURL)
   }
 
-  onModalClose = () => {
-    this.setState(({ isModalOpened }) => ({
-      isModalOpened: !isModalOpened,
-    }))
+  const onModalClose = () => {
+    setIsModalOpened(isModalOpened => !isModalOpened)
   }
 
-  render() {
-    return (
-      <>
-        <Searchbar onSubmit={this.formSubmitHandler}/>
-        {this.state.isRendered && <ImageGallery images={this.state.images} onClick={this.onModalOpen} />}
-        {this.state.isLoading && <Loader />}
-        {this.state.isRendered && <Button onClick={this.onLoadMore} />}
-        {this.state.isModalOpened && <Modal imageUrl={this.state.selectedImageUrl} onClose={this.onModalClose} />}
-        <GlobalStyle />
-      </>
-    );
-  }
+  return (
+    <>
+      <Searchbar onSubmit={formSubmitHandler}/>
+      {isRendered && <ImageGallery images={images} onClick={onModalOpen} />}
+      {isLoading && <Loader />}
+      {isRendered && <Button onClick={onLoadMore} />}
+      {isModalOpened && <Modal imageUrl={selectedImageUrl} onClose={onModalClose} />}
+      <GlobalStyle />
+    </>
+  );
+  
 };
